@@ -26,13 +26,13 @@ public class DailyReport {
         if (amountInEUROptional.isPresent()) {
             BigDecimal amountInEUR = amountInEUROptional.get();
             paymentsEUR.add(amountInEUR);
-            companyBalances.merge(payment.company, amountInEUR, BigDecimal::add);
+            companyBalances.merge(payment.getCompany(), amountInEUR, BigDecimal::add);
             dailyVolume = dailyVolume.add(amountInEUR.abs());
         } else {
-            notAvailableInEUR.add(payment.company);
+            notAvailableInEUR.add(payment.getCompany());
         }
 
-        outstandingAmountsPerCurrency.merge(payment.currency, payment.amount, BigDecimal::add);
+        outstandingAmountsPerCurrency.merge(payment.getCurrency(), payment.getAmount(), BigDecimal::add);
     }
 
     public void printFullReport() {
