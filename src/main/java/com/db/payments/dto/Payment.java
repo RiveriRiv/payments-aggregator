@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 @Getter
 @Builder
 public class Payment {
+
     private LocalDateTime dateTime;
     private String company;
     private String currency;

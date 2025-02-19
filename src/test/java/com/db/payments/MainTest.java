@@ -148,4 +148,30 @@ class MainTest {
 
         assertThat(output).contains("An exception occurred: ");
     }
+
+    @Test
+    void testWrongExchangeRateDateFormat() throws Exception {
+        Files.writeString(paymentsFile, "2025-02-14 10:00:00;Company A;USD;1000\n", StandardOpenOption.APPEND);
+        Files.writeString(ratesFile, "2025-02-14 00;USD;EUR;0.85\n", StandardOpenOption.APPEND);
+
+        String[] args = {paymentsFile.toString(), ratesFile.toString()};
+        Main.main(args);
+
+        String output = outputStream.toString();
+
+        assertThat(output).contains("An exception occurred: Wrong date format in exchange rates file:");
+    }
+
+    @Test
+    void testWrongPaymentsDateFormat() throws Exception {
+        Files.writeString(paymentsFile, "2025-02-14 10;Company A;USD;1000\n", StandardOpenOption.APPEND);
+        Files.writeString(ratesFile, "2025-02-14 00:00:00;USD;EUR;0.85\n", StandardOpenOption.APPEND);
+
+        String[] args = {paymentsFile.toString(), ratesFile.toString()};
+        Main.main(args);
+
+        String output = outputStream.toString();
+
+        assertThat(output).contains("An exception occurred: Wrong date format in payments file:");
+    }
 }
