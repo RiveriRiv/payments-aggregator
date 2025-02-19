@@ -54,9 +54,9 @@ class MainTest {
     @Test
     void testMultiplePaymentsEUR() throws Exception {
         Files.writeString(paymentsFile, """
-                2025-02-14 10:00:00;Company A;EUR;500
+                2025-02-14 10:00:00;Company A;EUR;-1000
                 2025-02-14 11:00:00;Company A;EUR;1500
-                2025-02-14 12:00:00;Company B;EUR;200
+                2025-02-14 12:00:00;Company B;EUR;20
                 """, StandardOpenOption.APPEND);
 
         String[] args = {paymentsFile.toString(), ratesFile.toString()};
@@ -65,10 +65,10 @@ class MainTest {
         String output = outputStream.toString();
 
         assertThat(output).contains("Highest EUR value: 1500");
-        assertThat(output).contains("Lowest EUR value: 200");
-        assertThat(output).contains("Transaction volume in EUR: 2200");
-        assertThat(output).contains("Outstanding amounts per company in EUR: {Company A=2000, Company B=200}");
-        assertThat(output).contains("Outstanding amounts per currency: {EUR=2200}");
+        assertThat(output).contains("Lowest EUR value: -1000");
+        assertThat(output).contains("Transaction volume in EUR: 2520");
+        assertThat(output).contains("Outstanding amounts per company in EUR: {Company A=500, Company B=20}");
+        assertThat(output).contains("Outstanding amounts per currency: {EUR=520}");
     }
 
     @Test
@@ -122,5 +122,30 @@ class MainTest {
         assertThat(output).contains("Transaction volume in EUR: 500");
         assertThat(output).contains("Outstanding amounts per company in EUR: {Company A=-500}");
         assertThat(output).contains("Outstanding amounts per currency: {EUR=-500}");
+    }
+
+    @Test
+    void testWrongPaymentLineFormat() throws Exception {
+        Files.writeString(paymentsFile, "2025-02-14 10:00:00Company A;EUR;-500\n", StandardOpenOption.APPEND);
+
+        String[] args = {paymentsFile.toString(), ratesFile.toString()};
+        Main.main(args);
+
+        String output = outputStream.toString();
+
+        assertThat(output).contains("An exception occurred: ");
+    }
+
+    @Test
+    void testWrongExchangeRateLineFormat() throws Exception {
+        Files.writeString(paymentsFile, "2025-02-14 10:00:00;Company A;USD;1000\n", StandardOpenOption.APPEND);
+        Files.writeString(ratesFile, "2025-02-14 00:00:00;USDEUR;0.85\n", StandardOpenOption.APPEND);
+
+        String[] args = {paymentsFile.toString(), ratesFile.toString()};
+        Main.main(args);
+
+        String output = outputStream.toString();
+
+        assertThat(output).contains("An exception occurred: ");
     }
 }
